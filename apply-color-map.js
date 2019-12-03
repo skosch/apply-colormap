@@ -8,8 +8,8 @@ var colormap = require("colormap")
 var cwise = require("cwise")
 
 var doColoring = cwise({
-  args: ["array", "array", "array", "array", "array", "scalar", "scalar", "scalar", "scalar"],
-  body: function(out_r, out_g, out_b, out_a, inp, cmap, lo, hi, alpha) {
+  args: ["array", "array", "array", "array", "array", "scalar", "scalar", "scalar"],
+  body: function(out_r, out_g, out_b, out_a, inp, cmap, lo, hi) {
     var idx = ((inp - lo) * (cmap.length-1) / (hi - lo)) | 0
     if(idx < 0) {
       idx = 0
@@ -20,7 +20,7 @@ var doColoring = cwise({
     out_r = cmap[idx][0]
     out_g = cmap[idx][1]
     out_b = cmap[idx][2]
-    out_a = alpha;
+    out_a = int(cmap[idx][3] * 255);
   }
 })
 
@@ -45,7 +45,7 @@ function applyColorMap(array, options) {
   var cmap = colormap({
     colormap: options.colormap || "jet",
     nshades: 256,
-    format: "rgb"
+    format: "rgba"
   })
   var s = 4;
   var out = options.outBuffer || new Uint8Array(array.size * s)
@@ -61,6 +61,6 @@ function applyColorMap(array, options) {
   for(var i=0; i<4; ++i) {
     out_colors[i] = ndarray(out, array.shape, out_stride, i);
   }
-  doColoring(out_colors[0], out_colors[1], out_colors[2], out_colors[3], array, cmap, lo, hi, alpha)
+  doColoring(out_colors[0], out_colors[1], out_colors[2], out_colors[3], array, cmap, lo, hi)
   return ndarray(out, out_shape)
 }
